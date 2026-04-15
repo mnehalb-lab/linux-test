@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced SysOps Practical Exam</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  :root {
+    --bg:#0a0c10;--panel:#0f1219;--border:#1e2535;--accent:#00e5ff;
+    --accent2:#ff4d6d;--text:#c8d3e8;--muted:#4a5568;
+    --correct:#39ff14;--wrong:#ff4d6d;--warn:#ffd60a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .container{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:40px 20px 80px;}
+
+  /* SETUP BANNER */
+  .setup-banner{background:rgba(255,214,10,0.07);border:1px solid rgba(255,214,10,0.3);padding:20px 24px;margin-bottom:40px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;color:#c8b860;animation:fadeDown 0.6s ease;}
+  .setup-banner strong{color:var(--warn);display:block;font-size:11px;letter-spacing:2px;margin-bottom:8px;}
+  .setup-banner code{background:rgba(255,214,10,0.12);padding:1px 6px;border-radius:2px;color:var(--warn);}
+  .setup-banner a{color:var(--warn);}
+  .setup-banner ol{padding-left:18px;}
+  .setup-banner ol li{margin-bottom:4px;}
+
+  /* HEADER */
+  .header{text-align:center;margin-bottom:50px;animation:fadeDown 0.8s ease;}
+  .header .badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--accent);border:1px solid var(--accent);padding:4px 14px;margin-bottom:20px;text-transform:uppercase;}
+  .header h1{font-size:clamp(32px,6vw,58px);font-weight:800;line-height:1.05;letter-spacing:-1px;color:#fff;}
+  .header h1 span{color:var(--accent);display:block;}
+  .header p{margin-top:16px;color:var(--muted);font-size:14px;font-family:'JetBrains Mono',monospace;letter-spacing:1px;}
+  .tags{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 12px;border-radius:2px;text-transform:uppercase;letter-spacing:1px;}
+  .tag-linux{background:rgba(57,255,20,0.1);color:var(--correct);border:1px solid rgba(57,255,20,0.3);}
+  .tag-docker{background:rgba(0,229,255,0.1);color:var(--accent);border:1px solid rgba(0,229,255,0.3);}
+  .tag-net{background:rgba(255,77,109,0.1);color:var(--accent2);border:1px solid rgba(255,77,109,0.3);}
+
+  /* CANDIDATE BOX */
+  .candidate-box{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);padding:24px 28px;margin-bottom:36px;animation:fadeUp 0.5s ease;}
+  .candidate-box label{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+  .candidate-box input{width:100%;background:#070910;border:1px solid var(--border);color:#fff;font-family:'JetBrains Mono',monospace;font-size:15px;padding:12px 16px;outline:none;transition:border-color 0.2s;border-radius:2px;}
+  .candidate-box input:focus{border-color:var(--accent);}
+  .candidate-box input::placeholder{color:var(--muted);font-size:13px;}
+
+  /* PROGRESS */
+  .progress-wrap{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 0;margin-bottom:40px;}
+  .progress-info{display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px;}
+  .progress-bar{height:2px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width 0.4s ease;}
+
+  /* SECTION HEADER */
+  .section-header{display:flex;align-items:center;gap:16px;margin:50px 0 30px;}
+  .section-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);writing-mode:vertical-rl;letter-spacing:2px;}
+  .section-title{font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;}
+  .section-title .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:10px;vertical-align:middle;}
+  .section-line{flex:1;height:1px;background:var(--border);}
+
+  /* MCQ */
+  .question-card{background:var(--panel);border:1px solid var(--border);border-left:3px solid transparent;padding:28px;margin-bottom:20px;transition:border-color 0.3s,transform 0.2s;animation:fadeUp 0.5s ease both;}
+  .question-card:hover{transform:translateX(3px);}
+  .question-card.answered-correct{border-left-color:var(--correct);}
+  .question-card.answered-wrong{border-left-color:var(--wrong);}
+  .q-number{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+  .q-topic{font-size:9px;padding:2px 8px;border-radius:1px;text-transform:uppercase;letter-spacing:1px;}
+  .q-text{font-size:15px;font-weight:600;color:#e8edf5;margin-bottom:20px;line-height:1.6;}
+  .q-text code{font-family:'JetBrains Mono',monospace;background:rgba(0,229,255,0.08);color:var(--accent);padding:2px 7px;border-radius:3px;font-size:13px;}
+  .options{display:grid;gap:8px;}
+  .option{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border:1px solid var(--border);cursor:pointer;transition:all 0.2s;font-size:14px;color:var(--text);background:transparent;border-radius:2px;}
+  .option:hover:not(.disabled){border-color:var(--accent);color:#fff;background:rgba(0,229,255,0.05);}
+  .option-letter{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);min-width:20px;margin-top:1px;transition:color 0.2s;}
+  .option.selected-correct{border-color:var(--correct);background:rgba(57,255,20,0.08);color:var(--correct);}
+  .option.selected-correct .option-letter{color:var(--correct);}
+  .option.selected-wrong{border-color:var(--wrong);background:rgba(255,77,109,0.08);color:var(--wrong);}
+  .option.selected-wrong .option-letter{color:var(--wrong);}
+  .option.show-correct{border-color:var(--correct);background:rgba(57,255,20,0.04);color:var(--correct);}
+  .option.show-correct .option-letter{color:var(--correct);}
+  .option.disabled{cursor:not-allowed;}
+  .option.disabled:hover{border-color:var(--border);background:transparent;color:var(--text);}
+  .explanation{margin-top:16px;padding:12px 16px;background:rgba(0,229,255,0.05);border-left:2px solid var(--accent);font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);line-height:1.7;display:none;animation:fadeUp 0.3s ease;}
+  .explanation.show{display:block;}
+  .explanation strong{color:var(--accent);}
+
+  /* PRACTICAL */
+  .practical-card{background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--accent2);padding:32px;margin-bottom:30px;animation:fadeUp 0.5s ease both;}
+  .practical-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent2);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;}
+  .practical-title{font-size:18px;font-weight:800;color:#fff;margin-bottom:16px;line-height:1.4;}
+  .practical-desc{font-size:14px;color:var(--text);line-height:1.8;margin-bottom:20px;}
+  .practical-desc code{font-family:'JetBrains Mono',monospace;background:rgba(255,77,109,0.1);color:var(--accent2);padding:2px 7px;border-radius:3px;font-size:13px;}
+  .task-list{list-style:none;display:grid;gap:10px;margin-bottom:24px;}
+  .task-list li{display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--text);line-height:1.6;}
+  .task-list li::before{content:'→';color:var(--accent2);font-family:'JetBrains Mono',monospace;flex-shrink:0;margin-top:1px;}
+  .task-list li code{font-family:'JetBrains Mono',monospace;background:rgba(255,77,109,0.1);color:var(--accent2);padding:1px 6px;border-radius:2px;font-size:12px;}
+  .answer-area label{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  textarea{width:100%;min-height:180px;background:#070910;border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;padding:16px;resize:vertical;outline:none;line-height:1.7;transition:border-color 0.2s;border-radius:2px;}
+  textarea:focus{border-color:var(--accent2);}
+  textarea::placeholder{color:var(--muted);}
+  .char-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-align:right;margin-top:6px;}
+
+  /* SCORE PANEL */
+  .score-panel{display:none;background:var(--panel);border:1px solid var(--border);padding:40px;text-align:center;margin-top:40px;animation:fadeUp 0.5s ease;}
+  .score-panel.show{display:block;}
+  .score-big{font-family:'JetBrains Mono',monospace;font-size:72px;font-weight:700;line-height:1;margin:10px 0;}
+  .score-label{font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+  .score-verdict{font-size:18px;font-weight:800;margin-top:16px;}
+  .score-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px;}
+  .breakdown-item{padding:16px;border:1px solid var(--border);}
+  .breakdown-item .val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;margin-bottom:4px;}
+  .breakdown-item .lbl{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+  /* EMAIL STATUS */
+  .email-status{margin-top:20px;padding:14px 18px;font-family:'JetBrains Mono',monospace;font-size:12px;border-radius:2px;display:none;line-height:1.7;}
+  .email-status.sending{display:block;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.2);color:var(--accent);}
+  .email-status.success{display:block;background:rgba(57,255,20,0.06);border:1px solid rgba(57,255,20,0.2);color:var(--correct);}
+  .email-status.error{display:block;background:rgba(255,77,109,0.06);border:1px solid rgba(255,77,109,0.2);color:var(--wrong);}
+  .email-status a{color:var(--warn);display:block;margin-top:8px;}
+
+  /* BUTTONS */
+  .submit-btn{display:block;width:100%;padding:18px;margin-top:40px;background:transparent;border:2px solid var(--accent);color:var(--accent);font-family:'Syne',sans-serif;font-size:14px;font-weight:800;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;}
+  .submit-btn:hover:not(:disabled){color:var(--bg);background:var(--accent);}
+  .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .reset-btn{display:block;width:100%;padding:14px;margin-top:16px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+  .reset-btn:hover{border-color:var(--muted);color:var(--text);}
+
+  @keyframes fadeDown{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:600px){.score-breakdown{grid-template-columns:1fr;}.score-big{font-size:52px;}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ════ SETUP BANNER ════ -->
+<div class="setup-banner" style="display:none;">
+  <strong>⚙️  ONE-TIME EMAILJS SETUP — COMPLETE BEFORE DEPLOYING TO GITHUB PAGES</strong>
+  <ol>
+    <li>Go to <a href="https://www.emailjs.com" target="_blank">emailjs.com</a> → sign up free (200 emails/month, no backend needed).</li>
+    <li><strong>Email Services</strong> tab → Add Service → connect your Gmail → copy the <code>Service ID</code>.</li>
+    <li><strong>Email Templates</strong> tab → Create Template → set <strong>To Email</strong> field to <code>mnehal66@gmail.com</code>.
+      In the template body paste these exact variables:<br>
+      <code>{{candidate_name}}</code> &nbsp;|&nbsp; <code>{{score_summary}}</code> &nbsp;|&nbsp; <code>{{mcq_results}}</code> &nbsp;|&nbsp; <code>{{practical_answers}}</code> &nbsp;|&nbsp; <code>{{submitted_at}}</code> &nbsp;|&nbsp; <code>{{json_payload}}</code><br>
+      Copy the <code>Template ID</code>.</li>
+    <li><strong>Account → API Keys</strong> → copy your <code>Public Key</code>.</li>
+    <li>In this file's <code>&lt;script&gt;</code> section, replace <code>YOUR_PUBLIC_KEY</code>, <code>YOUR_SERVICE_ID</code>, <code>YOUR_TEMPLATE_ID</code>.</li>
+    <li>Push to GitHub Pages — email fires automatically on every submission. ✅</li>
+  </ol>
+</div>
+
+<!-- ════ HEADER ════ -->
+<div class="header">
+  <div class="badge">// Advanced Practical Exam</div>
+  <h1>SysOps &amp; DevOps<span>Proficiency Test</span></h1>
+  <p>// 20 MCQ + 3 PRACTICAL — ADVANCED LEVEL — NO TIME LIMIT</p>
+  <div class="tags">
+    <span class="tag tag-linux">Linux</span>
+    <span class="tag tag-docker">Docker</span>
+    <span class="tag tag-net">Networking</span>
+  </div>
+</div>
+
+<!-- ════ CANDIDATE NAME ════ -->
+<div class="candidate-box">
+  <label>// candidate identification — required</label>
+  <input type="text" id="candidate-name" placeholder="Enter your full name before starting..." maxlength="80">
+</div>
+
+<!-- ════ PROGRESS ════ -->
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="progress-text">0 / 20 answered</span>
+    <span id="score-live">Score: —</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 · LINUX
+══════════════════════════════════════════ -->
+<div class="section-header">
+  <span class="section-num">01</span>
+  <div class="section-title"><span class="dot" style="background:var(--correct)"></span>Linux</div>
+  <div class="section-line"></div>
+</div>
+
+<div class="question-card" data-q="1" data-correct="b"
+  data-question="Find files modified in the last 30 minutes under /var/log with human-readable sizes"
+  data-options='{"a":"find /var/log -mmin 30 -exec ls -lh","b":"find /var/log -mmin -30 -exec ls -lh","c":"find /var/log -mtime -30 -ls","d":"ls -lhR /var/log | grep date"}'>
+  <div class="q-number">Q01 <span class="q-topic tag-linux tag">Linux</span></div>
+  <p class="q-text">You need to find all files modified in the last 30 minutes under <code>/var/log</code> and list them with human-readable sizes. Which command is correct?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>find /var/log -mmin 30 -exec ls -lh {} \;</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> <code>find /var/log -mmin -30 -exec ls -lh {} \;</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>find /var/log -mtime -30 -ls</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>ls -lhR /var/log | grep "$(date -d '30 min ago')"</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: B.</strong> <code>-mmin -30</code> = modified less than 30 min ago. Without minus (<code>-mmin 30</code>) matches exactly 30 min. <code>-mtime</code> works in 24h units, not minutes.</div>
+</div>
+
+<div class="question-card" data-q="2" data-correct="c"
+  data-question="Reduce CPU priority of running PID 4821 without killing it"
+  data-options='{"a":"kill -STOP 4821","b":"nice -n 19 4821","c":"renice +19 -p 4821","d":"ionice -c 3 -p 4821"}'>
+  <div class="q-number">Q02 <span class="q-topic tag-linux tag">Linux</span></div>
+  <p class="q-text">A process is consuming excessive CPU. After running <code>ps aux</code> you see PID 4821. You want to reduce its priority without killing it. What is the correct approach?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>kill -STOP 4821</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> <code>nice -n 19 4821</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>renice +19 -p 4821</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>ionice -c 3 -p 4821</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: C.</strong> <code>renice</code> changes niceness of a running process. <code>nice</code> only sets priority at launch. <code>ionice</code> affects I/O scheduling. <code>kill -STOP</code> pauses entirely.</div>
+</div>
+
+<div class="question-card" data-q="3" data-correct="d"
+  data-question="df shows / at 100% but du shows only 60% usage — most likely cause"
+  data-options='{"a":"Reserved blocks for root consuming the difference","b":"Hidden files not counted by du","c":"Filesystem corruption needing fsck","d":"Deleted files still held open by running processes"}'>
+  <div class="q-number">Q03 <span class="q-topic tag-linux tag">Linux</span></div>
+  <p class="q-text">You run <code>df -h</code> and root <code>/</code> is at 100% but <code>du -sh /*</code> shows only 60% usage. What is the MOST likely cause?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span>Reserved blocks for root are consuming the difference</div>
+    <div class="option" data-val="b"><span class="option-letter">B</span>Hidden files in the root directory are not counted by du</div>
+    <div class="option" data-val="c"><span class="option-letter">C</span>The filesystem is corrupted and needs fsck</div>
+    <div class="option" data-val="d"><span class="option-letter">D</span>Deleted files still held open by running processes are occupying space</div>
+  </div>
+  <div class="explanation"><strong>Correct: D.</strong> A deleted file whose handle is still open by a process occupies disk space until the process releases it. Use <code>lsof | grep deleted</code> to find them.</div>
+</div>
+
+<div class="question-card" data-q="4" data-correct="b"
+  data-question="Create a systemd service drop-in override without editing the original unit file"
+  data-options='{"a":"systemctl edit --full nginx.service","b":"systemctl edit nginx.service","c":"nano /etc/systemd/system/nginx.service","d":"systemctl override nginx.service"}'>
+  <div class="q-number">Q04 <span class="q-topic tag-linux tag">Linux</span></div>
+  <p class="q-text">Which command correctly creates a systemd service drop-in override WITHOUT editing the original unit file?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>systemctl edit --full nginx.service</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> <code>systemctl edit nginx.service</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>nano /etc/systemd/system/nginx.service</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>systemctl override nginx.service</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: B.</strong> <code>systemctl edit</code> creates a drop-in at <code>/etc/systemd/system/nginx.service.d/override.conf</code>. <code>--full</code> replaces the whole unit file instead of creating a drop-in.</div>
+</div>
+
+<div class="question-card" data-q="5" data-correct="a"
+  data-question="Extract lines 500-700 from a 10GB log file as fast as possible"
+  data-options='{"a":"sed -n 500,700p largefile.log","b":"awk NR>=500 largefile.log","c":"grep -n largefile.log | sed 500,700p","d":"tail -n +500 | head -n 200"}'>
+  <div class="q-number">Q05 <span class="q-topic tag-linux tag">Linux</span></div>
+  <p class="q-text">You need to extract only lines 500–700 from a 10GB log file as fast as possible. Which is the BEST approach?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>sed -n '500,700p' largefile.log</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> <code>awk 'NR>=500 && NR<=700' largefile.log</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>grep -n '' largefile.log | sed -n '500,700p'</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>tail -n +500 largefile.log | head -n 200</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: A.</strong> GNU <code>sed -n '500,700p'</code> stops after line 700, making it fastest on large files. <code>awk</code> and <code>tail+head</code> both work but continue reading more of the file.</div>
+</div>
+
+<div class="question-card" data-q="6" data-correct="c"
+  data-question="What does the 4 represent in chmod 4755 /usr/bin/myscript"
+  data-options='{"a":"Sticky bit — prevents deletion by non-owners","b":"GID bit — script runs with group owner privileges","c":"SUID bit — script runs with file owner effective UID","d":"Read-only lock on the binary"}'>
+  <div class="q-number">Q06 <span class="q-topic tag-linux tag">Linux</span></div>
+  <p class="q-text">After running <code>chmod 4755 /usr/bin/myscript</code>, what does the <code>4</code> represent?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span>Sticky bit — prevents deletion by non-owners</div>
+    <div class="option" data-val="b"><span class="option-letter">B</span>GID bit — script runs with group owner's privileges</div>
+    <div class="option" data-val="c"><span class="option-letter">C</span>SUID bit — script runs with file owner's effective UID</div>
+    <div class="option" data-val="d"><span class="option-letter">D</span>Read-only lock on the binary</div>
+  </div>
+  <div class="explanation"><strong>Correct: C.</strong> <code>4</code> = SUID (Set User ID). The process runs with the file owner's UID. <code>2</code> = SGID, <code>1</code> = Sticky bit.</div>
+</div>
+
+<div class="question-card" data-q="7" data-correct="d"
+  data-question="Watch /var/log/syslog in real time filtering only ERROR or CRITICAL lines"
+  data-options='{"a":"tail -f /var/log/syslog | grep ERROR CRITICAL","b":"tail -F /var/log/syslog -m ERROR|CRITICAL","c":"watch grep syslog ERROR","d":"tail -F /var/log/syslog | grep --line-buffered -E ERROR|CRITICAL"}'>
+  <div class="q-number">Q07 <span class="q-topic tag-linux tag">Linux</span></div>
+  <p class="q-text">You want to watch <code>/var/log/syslog</code> in real time but also filter only lines containing "ERROR" or "CRITICAL". Which command achieves this?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>tail -f /var/log/syslog | grep ERROR CRITICAL</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> <code>tail -F /var/log/syslog -m "ERROR|CRITICAL"</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>watch grep "ERROR\|CRITICAL" /var/log/syslog</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>tail -F /var/log/syslog | grep --line-buffered -E "ERROR|CRITICAL"</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: D.</strong> <code>--line-buffered</code> forces grep to flush output line-by-line. <code>-F</code> re-opens the file if rotated. <code>-E</code> enables extended regex for the OR pattern.</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 · DOCKER
+══════════════════════════════════════════ -->
+<div class="section-header">
+  <span class="section-num">02</span>
+  <div class="section-title"><span class="dot" style="background:var(--accent)"></span>Docker</div>
+  <div class="section-line"></div>
+</div>
+
+<div class="question-card" data-q="8" data-correct="b"
+  data-question="Key difference between COPY and ADD in a Dockerfile"
+  data-options='{"a":"ADD is faster via parallel transfers","b":"ADD can fetch remote URLs and auto-extract tar archives; COPY only copies local files","c":"COPY preserves file permissions ADD does not","d":"ADD creates a new layer COPY does not"}'>
+  <div class="q-number">Q08 <span class="q-topic tag-docker tag">Docker</span></div>
+  <p class="q-text">In a Dockerfile, what is the key difference between <code>COPY</code> and <code>ADD</code>?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span>ADD is faster because it uses parallel transfers</div>
+    <div class="option" data-val="b"><span class="option-letter">B</span>ADD can fetch remote URLs and auto-extract tar archives; COPY only copies local files</div>
+    <div class="option" data-val="c"><span class="option-letter">C</span>COPY preserves file permissions; ADD does not</div>
+    <div class="option" data-val="d"><span class="option-letter">D</span>ADD creates a new layer; COPY does not</div>
+  </div>
+  <div class="explanation"><strong>Correct: B.</strong> <code>ADD</code> supports remote URLs and auto-extracts <code>.tar.gz</code>. Best practice: use <code>COPY</code> unless you specifically need those features — <code>ADD</code>'s behavior can be surprising.</div>
+</div>
+
+<div class="question-card" data-q="9" data-correct="c"
+  data-question="Start a container interactively and override its default entrypoint for debugging"
+  data-options='{"a":"docker run -it myimage /bin/bash","b":"docker exec -it mycontainer /bin/bash","c":"docker run -it --entrypoint /bin/bash myimage","d":"docker start -ai mycontainer"}'>
+  <div class="q-number">Q09 <span class="q-topic tag-docker tag">Docker</span></div>
+  <p class="q-text">A container exits immediately. To debug it, you want to start it interactively and override the default entrypoint. Which command is correct?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>docker run -it myimage /bin/bash</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> <code>docker exec -it mycontainer /bin/bash</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>docker run -it --entrypoint /bin/bash myimage</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>docker start -ai mycontainer</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: C.</strong> <code>--entrypoint</code> overrides the ENTRYPOINT instruction. Option A appends bash as a CMD argument to the existing entrypoint. Option B requires a running container.</div>
+</div>
+
+<div class="question-card" data-q="10" data-correct="a"
+  data-question="Copy compiled binary from named stage builder in a multi-stage Dockerfile"
+  data-options='{"a":"COPY --from=builder /app/mybin /usr/local/bin/","b":"RUN cp /app/mybin /usr/local/bin/","c":"ADD --from=builder /app/mybin /usr/local/bin/","d":"COPY /app/mybin /usr/local/bin/ --stage=builder"}'>
+  <div class="q-number">Q10 <span class="q-topic tag-docker tag">Docker</span></div>
+  <p class="q-text">You have a multi-stage Dockerfile. Stage 1 is named <code>builder</code>. How do you copy only the compiled binary from stage 1 into the final stage?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>COPY --from=builder /app/mybin /usr/local/bin/</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> <code>RUN cp /app/mybin /usr/local/bin/</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>ADD --from=builder /app/mybin /usr/local/bin/</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>COPY /app/mybin /usr/local/bin/ --stage=builder</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: A.</strong> <code>COPY --from=&lt;stage_name&gt;</code> is the correct syntax for multi-stage builds. <code>ADD</code> does not support <code>--from</code>.</div>
+</div>
+
+<div class="question-card" data-q="11" data-correct="d"
+  data-question="docker inspect shows IPAddress empty — most likely reason"
+  data-options='{"a":"Container is using host networking mode","b":"Docker daemon is misconfigured","c":"Container has no exposed ports","d":"Container is connected to a user-defined network not the default bridge"}'>
+  <div class="q-number">Q11 <span class="q-topic tag-docker tag">Docker</span></div>
+  <p class="q-text">You run <code>docker inspect mycontainer</code> and notice <code>"IPAddress": ""</code> is empty. What is the most likely reason?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span>The container is using host networking mode</div>
+    <div class="option" data-val="b"><span class="option-letter">B</span>The Docker daemon is misconfigured</div>
+    <div class="option" data-val="c"><span class="option-letter">C</span>The container has no exposed ports</div>
+    <div class="option" data-val="d"><span class="option-letter">D</span>The container is connected to a user-defined network, not the default bridge</div>
+  </div>
+  <div class="explanation"><strong>Correct: D.</strong> The top-level <code>IPAddress</code> field only shows the default bridge IP. For custom networks check <code>Networks → &lt;network_name&gt; → IPAddress</code> inside the inspect output.</div>
+</div>
+
+<div class="question-card" data-q="12" data-correct="b"
+  data-question="What does docker system prune -a --volumes remove"
+  data-options='{"a":"Only stopped containers and dangling images","b":"All stopped containers ALL unused images unused networks and unused volumes","c":"All containers including running ones and all images","d":"Only dangling images and build cache"}'>
+  <div class="q-number">Q12 <span class="q-topic tag-docker tag">Docker</span></div>
+  <p class="q-text">What does <code>docker system prune -a --volumes</code> remove?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span>Only stopped containers and dangling images</div>
+    <div class="option" data-val="b"><span class="option-letter">B</span>All stopped containers, ALL unused images (not just dangling), unused networks, and unused volumes</div>
+    <div class="option" data-val="c"><span class="option-letter">C</span>All containers (including running ones) and all images</div>
+    <div class="option" data-val="d"><span class="option-letter">D</span>Only dangling images and build cache</div>
+  </div>
+  <div class="explanation"><strong>Correct: B.</strong> <code>-a</code> includes ALL unused images (not just dangling). <code>--volumes</code> adds unused named volumes. Running containers and their images are never removed.</div>
+</div>
+
+<div class="question-card" data-q="13" data-correct="c"
+  data-question="Fix depends_on not waiting for database to be ready in Docker Compose"
+  data-options='{"a":"Add restart: always to the api service","b":"Add links: [db] to the api service","c":"Use depends_on with condition: service_healthy and add a healthcheck to db","d":"Set network_mode: host"}'>
+  <div class="q-number">Q13 <span class="q-topic tag-docker tag">Docker</span></div>
+  <p class="q-text">In Docker Compose, <code>api</code> depends on <code>db</code>. After adding <code>depends_on: [db]</code>, the api still fails because the database isn't ready. What is the correct fix?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span>Add <code>restart: always</code> to the api service</div>
+    <div class="option" data-val="b"><span class="option-letter">B</span>Add <code>links: [db]</code> to the api service</div>
+    <div class="option" data-val="c"><span class="option-letter">C</span>Use <code>depends_on</code> with <code>condition: service_healthy</code> and add a <code>healthcheck</code> to the db service</div>
+    <div class="option" data-val="d"><span class="option-letter">D</span>Set <code>network_mode: host</code> so services share the same network</div>
+  </div>
+  <div class="explanation"><strong>Correct: C.</strong> <code>depends_on</code> alone only waits for the container to start, not the service inside. Pairing with <code>condition: service_healthy</code> and a proper <code>healthcheck</code> ensures readiness.</div>
+</div>
+
+<div class="question-card" data-q="14" data-correct="a"
+  data-question="docker run flags to limit a container to 1.5 CPUs and 512MB RAM"
+  data-options='{"a":"--cpus=1.5 --memory=512m","b":"--cpu=1.5 --ram=512m","c":"--cpu-shares=1500 --memory=512MB","d":"--cpuset-cpus=0,1 --mem-limit=512m"}'>
+  <div class="q-number">Q14 <span class="q-topic tag-docker tag">Docker</span></div>
+  <p class="q-text">You want to limit a container to use at most 1.5 CPUs and 512MB of RAM. Which <code>docker run</code> flags are correct?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>--cpus="1.5" --memory="512m"</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> <code>--cpu=1.5 --ram=512m</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>--cpu-shares=1500 --memory=512MB</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>--cpuset-cpus="0,1" --mem-limit=512m</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: A.</strong> <code>--cpus</code> sets a precise CPU quota. <code>--memory</code> accepts <code>m</code> for MiB. <code>--cpu-shares</code> is a relative weight not a hard limit. <code>--cpuset-cpus</code> pins to specific cores.</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 · NETWORKING
+══════════════════════════════════════════ -->
+<div class="section-header">
+  <span class="section-num">03</span>
+  <div class="section-title"><span class="dot" style="background:var(--accent2)"></span>Networking</div>
+  <div class="section-line"></div>
+</div>
+
+<div class="question-card" data-q="15" data-correct="b"
+  data-question="tcpdump command to capture TCP port 443 destined for 10.0.0.5 and save to pcap"
+  data-options='{"a":"tcpdump tcp port 443 dst 10.0.0.5 -w out.pcap","b":"tcpdump -w out.pcap tcp and port 443 and dst host 10.0.0.5","c":"tcpdump -f out.pcap port 443 and host 10.0.0.5","d":"tcpdump --filter=tcp:443 -o out.pcap"}'>
+  <div class="q-number">Q15 <span class="q-topic tag-net tag">Networking</span></div>
+  <p class="q-text">You need to capture only TCP packets on port 443 destined for <code>10.0.0.5</code> and save to a pcap file. Which <code>tcpdump</code> command is correct?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>tcpdump tcp port 443 dst 10.0.0.5 -w out.pcap</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> <code>tcpdump -w out.pcap 'tcp and port 443 and dst host 10.0.0.5'</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>tcpdump -f out.pcap port 443 and host 10.0.0.5</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>tcpdump --filter="tcp:443 dst:10.0.0.5" -o out.pcap</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: B.</strong> tcpdump uses BPF filter syntax. <code>dst host</code> filters by destination IP. Quote the filter expression when combining with boolean operators to avoid shell interpretation.</div>
+</div>
+
+<div class="question-card" data-q="16" data-correct="b"
+  data-question="Broadcast address of the subnet 192.168.10.50/26"
+  data-options='{"a":"192.168.10.127","b":"192.168.10.63","c":"192.168.10.255","d":"192.168.10.64"}'>
+  <div class="q-number">Q16 <span class="q-topic tag-net tag">Networking</span></div>
+  <p class="q-text">A server has IP <code>192.168.10.50/26</code>. What is the broadcast address of this subnet?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span>192.168.10.127</div>
+    <div class="option" data-val="b"><span class="option-letter">B</span>192.168.10.63</div>
+    <div class="option" data-val="c"><span class="option-letter">C</span>192.168.10.255</div>
+    <div class="option" data-val="d"><span class="option-letter">D</span>192.168.10.64</div>
+  </div>
+  <div class="explanation"><strong>Correct: B.</strong> /26 = 64 addresses per block. .50 falls in the .0–.63 block. Network = .0, Broadcast = .63, Usable hosts = .1–.62.</div>
+</div>
+
+<div class="question-card" data-q="17" data-correct="c"
+  data-question="Add persistent static route to 10.20.0.0/16 via 192.168.1.254 on modern Ubuntu Netplan"
+  data-options='{"a":"route add -net 10.20.0.0/16 gw 192.168.1.254","b":"In /etc/network/interfaces up route add","c":"In /etc/netplan/*.yaml routes: [{to: 10.20.0.0/16, via: 192.168.1.254}]","d":"ip route add 10.20.0.0/16 via 192.168.1.254 in /etc/rc.local"}'>
+  <div class="q-number">Q17 <span class="q-topic tag-net tag">Networking</span></div>
+  <p class="q-text">You want to add a persistent static route: traffic to <code>10.20.0.0/16</code> should go through gateway <code>192.168.1.254</code> on a modern Ubuntu system using Netplan. What is the correct approach?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>route add -net 10.20.0.0/16 gw 192.168.1.254</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> In <code>/etc/network/interfaces</code>: <code>up route add -net 10.20.0.0/16 gw 192.168.1.254</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> In <code>/etc/netplan/*.yaml</code>: <code>routes: [{to: 10.20.0.0/16, via: 192.168.1.254}]</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>ip route add 10.20.0.0/16 via 192.168.1.254</code> added to <code>/etc/rc.local</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: C.</strong> Modern Ubuntu uses Netplan. Routes defined in <code>/etc/netplan/</code> survive reboots. <code>ip route add</code> is ephemeral. <code>/etc/network/interfaces</code> is not used by default on Netplan systems.</div>
+</div>
+
+<div class="question-card" data-q="18" data-correct="a"
+  data-question="Test if UDP port 5353 is reachable on 10.0.0.1"
+  data-options='{"a":"nc -vzu 10.0.0.1 5353","b":"telnet 10.0.0.1 5353","c":"nmap -p 5353 10.0.0.1","d":"ping -p 5353 10.0.0.1"}'>
+  <div class="q-number">Q18 <span class="q-topic tag-net tag">Networking</span></div>
+  <p class="q-text">You need to test if UDP port 5353 is reachable on host <code>10.0.0.1</code>. Which tool/command is appropriate?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>nc -vzu 10.0.0.1 5353</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> <code>telnet 10.0.0.1 5353</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>nmap -p 5353 10.0.0.1</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>ping -p 5353 10.0.0.1</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: A.</strong> <code>nc -u</code> uses UDP, <code>-z</code> is scan mode, <code>-v</code> verbose. <code>telnet</code> is TCP-only. <code>nmap</code> without <code>-sU</code> defaults to TCP. <code>ping</code> uses ICMP with no port concept.</div>
+</div>
+
+<div class="question-card" data-q="19" data-correct="b"
+  data-question="iptables rate-limit incoming SSH to 3 per minute per source IP for brute-force protection"
+  data-options='{"a":"iptables -A INPUT -p tcp --dport 22 -m limit --limit 3/min -j ACCEPT","b":"Use iptables recent module tracking NEW connections per source IP dropping at hitcount 4 within 60 seconds","c":"iptables -A INPUT -p tcp --dport 22 --limit 3/min -j DROP","d":"iptables -I INPUT -p tcp --dport 22 -m connlimit --connlimit-above 3 -j DROP"}'>
+  <div class="q-number">Q19 <span class="q-topic tag-net tag">Networking</span></div>
+  <p class="q-text">Using <code>iptables</code>, you want to rate-limit incoming SSH connections to 3 per minute per source IP (brute-force protection) while allowing established sessions to continue. What is the correct approach?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>iptables -A INPUT -p tcp --dport 22 -m limit --limit 3/min -j ACCEPT</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span>Use the <code>recent</code> module to track NEW connections per source IP and drop when hitcount reaches 4 within 60 seconds</div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>iptables -A INPUT -p tcp --dport 22 --limit 3/min -j DROP</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>iptables -I INPUT -p tcp --dport 22 -m connlimit --connlimit-above 3 -j DROP</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: B.</strong> The <code>recent</code> module tracks per-source-IP connection attempts. <code>--hitcount 4 --seconds 60</code> drops the 4th+ NEW connection per minute per IP. Option A uses a global rate limit, not per-IP. Option D limits concurrent connections, not rate.</div>
+</div>
+
+<div class="question-card" data-q="20" data-correct="d"
+  data-question="Nginx reverse proxy on port 443 with TLS termination forwarding to app on localhost:8080"
+  data-options='{"a":"proxy_pass http://0.0.0.0:8080 inside server listen 443 ssl","b":"proxy_pass https://localhost:8080 inside server listen 80","c":"fastcgi_pass 127.0.0.1:8080 inside server listen 443 ssl","d":"proxy_pass http://127.0.0.1:8080 inside server listen 443 ssl with ssl_certificate directives"}'>
+  <div class="q-number">Q20 <span class="q-topic tag-net tag">Networking</span></div>
+  <p class="q-text">A web app on port 8080 should only be accessible via localhost. You want to use <code>nginx</code> as a reverse proxy with TLS termination. Which nginx config is correct?</p>
+  <div class="options">
+    <div class="option" data-val="a"><span class="option-letter">A</span> <code>proxy_pass http://0.0.0.0:8080;</code> inside <code>server { listen 443 ssl; }</code></div>
+    <div class="option" data-val="b"><span class="option-letter">B</span> <code>proxy_pass https://localhost:8080;</code> inside <code>server { listen 80; }</code></div>
+    <div class="option" data-val="c"><span class="option-letter">C</span> <code>fastcgi_pass 127.0.0.1:8080;</code> inside <code>server { listen 443 ssl; }</code></div>
+    <div class="option" data-val="d"><span class="option-letter">D</span> <code>proxy_pass http://127.0.0.1:8080;</code> inside <code>server { listen 443 ssl; ssl_certificate ...; ssl_certificate_key ...; }</code></div>
+  </div>
+  <div class="explanation"><strong>Correct: D.</strong> TLS terminates at nginx (port 443 ssl) with certificates configured. The backend runs plain HTTP on localhost:8080 — no HTTPS needed between nginx and the local app. <code>fastcgi_pass</code> is for PHP-FPM, not HTTP apps.</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 · PRACTICALS
+══════════════════════════════════════════ -->
+<div class="section-header" style="margin-top:60px">
+  <span class="section-num">04</span>
+  <div class="section-title" style="color:var(--accent2)"><span class="dot" style="background:var(--accent2)"></span>Practical Scenarios</div>
+  <div class="section-line"></div>
+</div>
+
+<div class="practical-card">
+  <div class="practical-num">// PRACTICAL 01 — LINUX + DOCKER</div>
+  <div class="practical-title">Production Server Triage &amp; Container Hardening</div>
+  <div class="practical-desc">A production Ubuntu 22.04 server is intermittently running out of memory, causing the <code>app-api</code> Docker container to get OOM-killed. The on-call engineer suspects a memory leak but also wants to harden the container before the permanent fix is deployed.</div>
+  <ul class="task-list">
+    <li>Write the exact commands to identify which process/container is consuming the most memory right now. Include both a system-level view and a Docker-specific view.</li>
+    <li>Write a <code>docker run</code> command that limits <code>app-api</code> to 512MB RAM with 256MB memory swap limit and restarts only on failure (max 5 retries).</li>
+    <li>Show how to configure the Docker daemon to use <code>json-file</code> log driver with max size 10MB and 3 rotated files. Include where the config lives and a per-container override example.</li>
+    <li>Write a one-liner to find all files in <code>/data/uploads</code> modified in the last 10 minutes and larger than 1MB.</li>
+    <li>Explain how Linux <code>cgroups v2</code> enables the memory limiting you configured in Docker, and how you'd verify the cgroup hierarchy for a running container.</li>
+  </ul>
+  <div class="answer-area">
+    <label>// your answer — commands, config, and explanations</label>
+    <textarea id="p1" placeholder="1. Memory identification:&#10;   $ free -h&#10;   $ docker stats --no-stream&#10;&#10;2. docker run command:&#10;   $ docker run --memory=512m ...&#10;&#10;3. /etc/docker/daemon.json:&#10;   { &quot;log-driver&quot;: &quot;json-file&quot; ... }&#10;..." oninput="updateCharCount('p1','p1count')"></textarea>
+    <div class="char-count" id="p1count">0 characters</div>
+  </div>
+</div>
+
+<div class="practical-card">
+  <div class="practical-num">// PRACTICAL 02 — NETWORKING + LINUX</div>
+  <div class="practical-title">Network Debugging &amp; Firewall Rule Engineering</div>
+  <div class="practical-desc">You manage a server with two interfaces: <code>eth0</code> (public, 203.0.113.10/24) and <code>eth1</code> (private, 10.10.0.1/24). Set up IP forwarding, NAT for the private subnet, and diagnose a connectivity issue reported by a developer.</div>
+  <ul class="task-list">
+    <li>Enable IP forwarding persistently (survives reboot) and verify it is active without rebooting.</li>
+    <li>Write the <code>iptables</code> rules to NAT the entire <code>10.10.0.0/24</code> subnet through the public IP on <code>eth0</code>. Include FORWARD chain rules for bidirectional traffic.</li>
+    <li>A developer reports: "I can ping 8.8.8.8 from my private server (10.10.0.50) but cannot curl https://api.example.com." Describe your full diagnostic process — which commands you run on which machines, in what order, and what you're looking for at each step.</li>
+    <li>Write commands to: (a) show all listening TCP/UDP ports with owning processes, (b) check if port <code>9200</code> is reachable from the internet, (c) block all traffic to port 9200 except from <code>10.10.0.0/24</code>.</li>
+    <li>Explain the difference between <code>ss</code> and <code>netstat</code> for socket inspection, and give a concrete example where <code>ss</code> provides info <code>netstat</code> cannot.</li>
+  </ul>
+  <div class="answer-area">
+    <label>// your answer — commands, iptables rules, and diagnostic steps</label>
+    <textarea id="p2" placeholder="1. Enable IP forwarding:&#10;   $ sysctl -w net.ipv4.ip_forward=1&#10;   Edit /etc/sysctl.conf ...&#10;&#10;2. iptables NAT rules:&#10;   $ iptables -t nat -A POSTROUTING ...&#10;&#10;3. Diagnostic process:&#10;   Step 1: On 10.10.0.50 run ...&#10;..." oninput="updateCharCount('p2','p2count')"></textarea>
+    <div class="char-count" id="p2count">0 characters</div>
+  </div>
+</div>
+
+<div class="practical-card">
+  <div class="practical-num">// PRACTICAL 03 — DOCKER COMPOSE + FULL STACK</div>
+  <div class="practical-title">Design a Production-Grade Multi-Container Stack</div>
+  <div class="practical-desc">Design a complete Docker Compose setup: Node.js API (<code>api</code>), PostgreSQL (<code>db</code>), Redis (<code>cache</code>), and Nginx (<code>proxy</code>). All traffic must enter through nginx on port 443.</div>
+  <ul class="task-list">
+    <li>Write the complete <code>docker-compose.yml</code> with network isolation: <code>db</code> and <code>cache</code> must NOT be reachable from the nginx container directly. Only <code>api</code> can talk to <code>db</code> and <code>cache</code>. Use named networks.</li>
+    <li>Add health checks to <code>db</code> (using <code>pg_isready</code>) and <code>cache</code> (using <code>redis-cli ping</code>). Make <code>api</code> wait for both to be healthy before starting.</li>
+    <li>Configure named volumes for PostgreSQL data and Redis AOF persistence. Show how to back up the Postgres volume to a tar archive without stopping the container.</li>
+    <li>Write a multi-stage Dockerfile for the Node.js <code>api</code> service: stage 1 installs deps and builds, stage 2 is a minimal runtime image that runs as a non-root user.</li>
+    <li>If <code>api</code> can resolve <code>db</code> by hostname but cannot connect on port 5432, what are the 3 most likely causes and how would you diagnose each one?</li>
+  </ul>
+  <div class="answer-area">
+    <label>// your answer — docker-compose.yml, Dockerfile, and explanations</label>
+    <textarea id="p3" placeholder="# docker-compose.yml&#10;version: '3.9'&#10;services:&#10;  db:&#10;    image: postgres:15&#10;    ...&#10;&#10;# Dockerfile (api)&#10;FROM node:20-alpine AS builder&#10;...&#10;&#10;# Explanations&#10;..." oninput="updateCharCount('p3','p3count')"></textarea>
+    <div class="char-count" id="p3count">0 characters</div>
+  </div>
+</div>
+
+<button class="submit-btn" id="submit-btn" onclick="submitTest()">Submit Test &amp; Send Results to Examiner</button>
+<button class="reset-btn" onclick="resetTest()">↺ Reset Test</button>
+
+<!-- SCORE PANEL -->
+<div class="score-panel" id="score-panel">
+  <div class="score-label">// MCQ SCORE</div>
+  <div class="score-big" id="score-display">—</div>
+  <div class="score-verdict" id="score-verdict"></div>
+  <div class="score-breakdown">
+    <div class="breakdown-item">
+      <div class="val" id="bd-correct" style="color:var(--correct)">—</div>
+      <div class="lbl">Correct</div>
+    </div>
+    <div class="breakdown-item">
+      <div class="val" id="bd-wrong" style="color:var(--wrong)">—</div>
+      <div class="lbl">Incorrect</div>
+    </div>
+    <div class="breakdown-item">
+      <div class="val" id="bd-skip" style="color:var(--warn)">—</div>
+      <div class="lbl">Skipped</div>
+    </div>
+  </div>
+  <div class="email-status" id="email-status"></div>
+  <p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-top:24px;line-height:1.8">
+    // Practical answers are self-assessed — review against best practices.<br>
+    // Scroll up to see correct answers highlighted in each question card.
+  </p>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ══════════════════════════════════════════════════════
+//  EMAILJS CONFIG — replace before deploying
+// ══════════════════════════════════════════════════════
+const EMAILJS_PUBLIC_KEY  = 'mKv0LPTWegmq-lPDT';   // Account → API Keys
+const EMAILJS_SERVICE_ID  = 'service_cfh3lty';   // Email Services tab
+const EMAILJS_TEMPLATE_ID = 'template_j5et742';  // Email Templates tab
+// ══════════════════════════════════════════════════════
+
+emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+// ── State ──
+const userAnswers = {};
+let submitted = false;
+
+// ── Option click ──
+document.querySelectorAll('.option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    if (submitted) return;
+    const card = opt.closest('.question-card');
+    if (card.classList.contains('answered-correct') || card.classList.contains('answered-wrong')) return;
+
+    const chosen  = opt.dataset.val;
+    const qNum    = card.dataset.q;
+    const correct = card.dataset.correct;
+    const isRight = chosen === correct;
+
+    let options = {};
+    try { options = JSON.parse(card.dataset.options || '{}'); } catch(e) {}
+
+    userAnswers[qNum] = {
+      question_num:   parseInt(qNum),
+      question:       card.dataset.question || '',
+      options:        options,
+      correct_answer: correct,
+      user_answer:    chosen,
+      is_correct:     isRight,
+      status:         isRight ? 'correct' : 'wrong'
+    };
+
+    card.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+    if (isRight) {
+      opt.classList.add('selected-correct');
+      card.classList.add('answered-correct');
+    } else {
+      opt.classList.add('selected-wrong');
+      card.classList.add('answered-wrong');
+      card.querySelectorAll('.option').forEach(o => {
+        if (o.dataset.val === correct) o.classList.add('show-correct');
+      });
+    }
+    card.querySelector('.explanation')?.classList.add('show');
+    updateProgress();
+  });
+});
+
+function updateProgress() {
+  const total    = 20;
+  const answered = Object.keys(userAnswers).length;
+  const correct  = Object.values(userAnswers).filter(a => a.is_correct).length;
+  document.getElementById('progress-text').textContent = `${answered} / ${total} answered`;
+  document.getElementById('score-live').textContent    = answered > 0 ? `Score: ${correct}/${answered}` : 'Score: —';
+  document.getElementById('progress-fill').style.width = (answered / total * 100) + '%';
+}
+
+function updateCharCount(id, countId) {
+  document.getElementById(countId).textContent = document.getElementById(id).value.length.toLocaleString() + ' characters';
+}
+
+async function submitTest() {
+  const candidateName = document.getElementById('candidate-name').value.trim() || 'Anonymous';
+  submitted = true;
+  document.getElementById('submit-btn').disabled = true;
+
+  // Reveal all answers
+  document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+  document.querySelectorAll('.explanation').forEach(e => e.classList.add('show'));
+  document.querySelectorAll('.question-card').forEach(card => {
+    const correct = card.dataset.correct;
+    card.querySelectorAll('.option').forEach(o => {
+      if (o.dataset.val === correct) o.classList.add('show-correct');
+    });
+  });
+
+  // Score
+  const total    = 20;
+  const answered = Object.keys(userAnswers).length;
+  const correct  = Object.values(userAnswers).filter(a => a.is_correct).length;
+  const wrong    = answered - correct;
+  const skipped  = total - answered;
+  const pct      = Math.round((correct / total) * 100);
+
+  document.getElementById('score-display').textContent = `${pct}%`;
+  document.getElementById('bd-correct').textContent    = correct;
+  document.getElementById('bd-wrong').textContent      = wrong;
+  document.getElementById('bd-skip').textContent       = skipped;
+
+  let verdict = '', vColor = 'var(--wrong)';
+  if      (pct >= 90) { verdict = '🔥 Expert — Lives in the terminal.';             vColor = 'var(--correct)'; }
+  else if (pct >= 75) { verdict = '✅ Proficient — Strong practical knowledge.';    vColor = 'var(--correct)'; }
+  else if (pct >= 55) { verdict = '⚠️ Intermediate — Good base, keep diving deeper.'; vColor = 'var(--warn)'; }
+  else                { verdict = '📖 Developing — Review explanations & practice.'; }
+
+  document.getElementById('score-verdict').textContent = verdict;
+  document.getElementById('score-verdict').style.color = vColor;
+  document.getElementById('score-panel').classList.add('show');
+  document.getElementById('score-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  updateProgress();
+
+  // Build full MCQ JSON (include skipped questions too)
+  const mcqFull = [];
+  document.querySelectorAll('.question-card').forEach(card => {
+    const qNum    = card.dataset.q;
+    const correct = card.dataset.correct;
+    let options   = {};
+    try { options = JSON.parse(card.dataset.options || '{}'); } catch(e) {}
+    const ua = userAnswers[qNum];
+    mcqFull.push({
+      question_num:   parseInt(qNum),
+      question:       card.dataset.question || '',
+      options:        options,
+      correct_answer: correct,
+      user_answer:    ua ? ua.user_answer : 'skipped',
+      is_correct:     ua ? ua.is_correct  : false,
+      status:         ua ? ua.status      : 'skipped'
+    });
+  });
+
+  const practicals = {
+    practical_01: { title: 'Production Server Triage & Container Hardening', answer: document.getElementById('p1').value || '(no answer provided)' },
+    practical_02: { title: 'Network Debugging & Firewall Rule Engineering',  answer: document.getElementById('p2').value || '(no answer provided)' },
+    practical_03: { title: 'Production-Grade Multi-Container Stack',         answer: document.getElementById('p3').value || '(no answer provided)' }
+  };
+
+  // ── Full JSON payload ──
+  const payload = {
+    candidate:    candidateName,
+    submitted_at: new Date().toISOString(),
+    score: {
+      correct,
+      wrong,
+      skipped,
+      total,
+      percentage: pct + '%',
+      verdict
+    },
+    mcq_results:        mcqFull,
+    practical_answers:  practicals
+  };
+
+  await sendEmail(candidateName, pct, correct, total, wrong, skipped, verdict, mcqFull, practicals, payload);
+}
+
+async function sendEmail(name, pct, correct, total, wrong, skipped, verdict, mcq, practicals, payload) {
+  const statusEl = document.getElementById('email-status');
+  statusEl.className   = 'email-status sending';
+  statusEl.textContent = '⏳ Sending results to mnehal66@gmail.com…';
+
+  // Human-readable MCQ block for email body
+  const mcqText = mcq.map(q => {
+    const icon = q.status === 'correct' ? '✅' : q.status === 'wrong' ? '❌' : '⏭';
+    return `${icon} Q${String(q.question_num).padStart(2,'0')}: ${q.question}\n` +
+           `   Correct: [${q.correct_answer.toUpperCase()}]  |  Your answer: [${q.user_answer.toUpperCase()}]  |  ${q.status.toUpperCase()}`;
+  }).join('\n\n');
+
+  const practicalText = Object.values(practicals).map((p, i) =>
+    `━━━ Practical ${i + 1}: ${p.title} ━━━\n${p.answer}`
+  ).join('\n\n');
+
+  const templateParams = {
+    candidate_name:    name,
+    score_summary:     `${pct}% — ${correct}/${total} correct | ${wrong} wrong | ${skipped} skipped\n${verdict}`,
+    mcq_results:       mcqText,
+    practical_answers: practicalText,
+    submitted_at:      new Date().toLocaleString(),
+    json_payload:      JSON.stringify(payload, null, 2)
+  };
+
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+    statusEl.className   = 'email-status success';
+    statusEl.textContent = `✅ Results for "${name}" sent to mnehal66@gmail.com successfully!`;
+  } catch (err) {
+    console.error('EmailJS error:', err);
+    statusEl.className   = 'email-status error';
+    statusEl.innerHTML   = `❌ Email failed: ${err?.text || err?.message || 'Check console for details'}<br>Verify your Service ID, Template ID, and Public Key in the script.`;
+    // Fallback: auto-download JSON
+    downloadJson(payload, name);
+  }
+}
+
+function downloadJson(payload, name) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `exam-${name.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}.json`;
+  a.textContent = '⬇ Download results as JSON (email fallback)';
+  document.getElementById('email-status').appendChild(a);
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function resetTest() {
+  if (!confirm('Reset the entire test? All answers will be lost.')) return;
+  location.reload();
+}
+</script>
+</body>
+</html>
