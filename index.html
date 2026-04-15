@@ -208,18 +208,17 @@
     <div class="info-row">
       <div class="info-item"><div class="iv">20</div><div class="il">MCQ</div></div>
       <div class="info-item"><div class="iv">3</div><div class="il">Practical</div></div>
-      <div class="info-item"><div class="iv">2h</div><div class="il">Time Limit</div></div>
+      <div class="info-item"><div class="iv">2h 30m</div><div class="il">Time Limit</div></div>
     </div>
     <div class="rules-box">
       <div class="r-title">// Exam Rules &amp; Conditions</div>
       <ul>
         <li><span class="no">✕ No AI tools allowed</span> — ChatGPT, Claude, Copilot, Gemini or any AI assistant is strictly prohibited.</li>
-        <li><span class="no">✕ MCQ section</span> — No googling allowed. Answer from your own knowledge only.</li>
+        <li><span class="no">✕ MCQ section</span> — Google allowed but no direct copy-paste. Find answers from documentation only. Answer from your own knowledge only.</li>
         <li><span class="ok">✓ Practical section</span> — You may Google for reference, but do NOT paste the question into any search or AI tool.</li>
         <li><span class="no">✕ No copy-pasting</span> — Do not copy full question text into any external tool or browser search bar.</li>
         <li><span class="ok">✓ Screen share</span> — Your screen must be shared at all times during the exam.</li>
         <li><span class="ok">✓ Camera on</span> — Your camera must remain on for the entire duration of the exam.</li>
-        <li><span class="no">✕ Violations</span> — Any breach of these rules will result in immediate disqualification.</li>
       </ul>
     </div>
     <div class="rules-ack">
@@ -269,7 +268,7 @@
 <div class="header">
   <div class="badge">// DevOps Practical Exam</div>
   <h1>DevOps<span>Proficiency Test</span></h1>
-  <p>// 20 MCQ + 3 PRACTICAL — DEVOPS LEVEL — 2 HOUR TIME LIMIT</p>
+  <p>// 20 MCQ + 3 PRACTICAL — DEVOPS LEVEL — 2H 30M TIME LIMIT</p>
   <div class="tags">
     <span class="tag tag-linux">Linux</span>
     <span class="tag tag-docker">Docker</span>
@@ -292,7 +291,7 @@
   <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
   <div class="timer-wrap">
     <span>// Time remaining:</span>
-    <span class="timer-clock" id="timer-clock">2:00:00</span>
+    <span class="timer-clock" id="timer-clock">2:30:00</span>
     <span id="timer-label"></span>
     <button class="reset-inline-btn" onclick="resetTest()" title="Reset exam (admin only)">↺ Reset</button>
   </div>
@@ -1023,7 +1022,7 @@ function downloadJson(payload, name) {
 //  EXAM CONFIG
 // ════════════════════════════════════════════
 const RESET_PASSWORD = 'admin1234'; // change to your admin password
-const DURATION       = 2 * 60 * 60; // 2 hours in seconds
+const DURATION       = (2 * 60 + 30) * 60; // 2 hours 30 minutes in seconds
 const KEY_START      = 'exam_start_ts';
 const KEY_SUBMITTED  = 'exam_submitted';
 let timerInterval    = null;
