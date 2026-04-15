@@ -188,10 +188,6 @@
   .ssh-cred .copy-btn:hover{border-color:#39ff14;color:#39ff14;}
   .ssh-warning{background:rgba(255,214,10,0.06);border:1px solid rgba(255,214,10,0.25);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#c8b860;line-height:1.7;margin-bottom:16px;}
   .ssh-warning strong{color:var(--warn);}
-  .ssh-frame-wrap{border:1px solid var(--border);border-top:3px solid #39ff14;overflow:hidden;border-radius:0 0 2px 2px;}
-  .ssh-frame-wrap iframe{width:100%;height:600px;border:none;display:block;background:#000;}
-  .ssh-launch-btn{display:block;width:100%;padding:14px;background:transparent;border:2px solid #39ff14;color:#39ff14;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;margin-bottom:16px;}
-  .ssh-launch-btn:hover{background:#39ff14;color:#0a0c10;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
   @media(max-width:600px){.score-breakdown{grid-template-columns:1fr;}.score-big{font-size:52px;}}
 </style>
@@ -710,6 +706,7 @@
 <div class="tab-panel ssh-panel" id="tab-ssh">
 
   <div style="margin-top:20px;">
+
     <!-- Credentials bar -->
     <div class="ssh-info-bar">
       <div class="ssh-cred">
@@ -740,24 +737,43 @@
       This server is provided for practical experimentation only. Do not install persistent backdoors, delete system files, or disrupt other candidates. Session activity may be logged.
     </div>
 
-    <!-- Launch button -->
-    <button class="ssh-launch-btn" onclick="loadSSH()">⚡ Launch SSH Terminal</button>
+    <!-- Connect instructions -->
+    <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid #39ff14;padding:28px 28px 24px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#39ff14;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;">// Connect from your terminal</div>
 
-    <!-- SSH iframe (loaded on demand) -->
-    <div class="ssh-frame-wrap" id="ssh-frame-wrap" style="display:none;">
-      <iframe id="ssh-iframe" allow="clipboard-read; clipboard-write"></iframe>
+      <div style="margin-bottom:16px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">SSH Command</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;font-family:'JetBrains Mono',monospace;font-size:14px;background:#070910;border:1px solid var(--border);border-left:3px solid #39ff14;padding:14px 18px;color:#39ff14;">ssh root@142.132.178.17</div>
+          <button class="copy-btn" style="padding:14px 16px;font-size:11px;" onclick="copyVal('ssh root@142.132.178.17',this)">Copy</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Password</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;font-family:'JetBrains Mono',monospace;font-size:14px;background:#070910;border:1px solid var(--border);border-left:3px solid #39ff14;padding:14px 18px;color:#39ff14;" id="pwd-alt">••••••••</div>
+          <button class="copy-btn" style="padding:14px 16px;font-size:11px;" onclick="togglePwdAlt(this)">Show</button>
+          <button class="copy-btn" style="padding:14px 16px;font-size:11px;" onclick="copyVal('4here#@',this)">Copy</button>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);padding-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Windows</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);">PuTTY or Windows Terminal</div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">macOS / Linux</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);">Built-in Terminal app</div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">VS Code</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);">Remote-SSH extension</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Fallback instructions -->
-    <div style="margin-top:16px;background:var(--panel);border:1px solid var(--border);padding:20px 24px;">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">// Alternative — connect from your own terminal</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;background:#070910;border:1px solid var(--border);border-left:3px solid #39ff14;padding:14px 18px;color:#39ff14;">
-        ssh root@142.132.178.17
-      </div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:10px;">
-        Password: <span style="color:#39ff14;letter-spacing:1px;" id="pwd-alt">4here#@</span>
-      </div>
-    </div>
   </div>
 
 </div><!-- /tab-ssh -->
@@ -1107,17 +1123,6 @@ function switchTab(name, btn) {
   btn.classList.add('active');
 }
 
-// ── SSH terminal loader ──
-// Uses sshwifty public demo — connects to your server via WebSocket proxy
-// For production, host your own sshwifty instance
-function loadSSH() {
-  const wrap   = document.getElementById('ssh-frame-wrap');
-  const iframe = document.getElementById('ssh-iframe');
-  iframe.src = 'http://142.132.178.17:7681';
-  wrap.style.display = 'block';
-  document.querySelector('.ssh-launch-btn').textContent = '↺ Reload Terminal';
-}
-
 // ── Copy to clipboard ──
 function copyVal(val, btn) {
   navigator.clipboard.writeText(val).then(() => {
@@ -1146,6 +1151,17 @@ function togglePwd(btn) {
   } else {
     el.textContent = '••••••••••••••';
     el.style.letterSpacing = '3px';
+    btn.textContent = 'Show';
+  }
+}
+
+function togglePwdAlt(btn) {
+  const el = document.getElementById('pwd-alt');
+  if (el.textContent.includes('•')) {
+    el.textContent = '4here#@';
+    btn.textContent = 'Hide';
+  } else {
+    el.textContent = '••••••••';
     btn.textContent = 'Show';
   }
 }
