@@ -18,7 +18,7 @@
   .container{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:40px 20px 80px;}
 
   /* SETUP BANNER */
-  .setup-banner{background:rgba(255,214,10,0.07);border:1px solid rgba(255,214,10,0.3);padding:20px 24px;margin-bottom:40px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;color:#c8b860;animation:fadeDown 0.6s ease;}
+  .setup-banner{display:none;}
   .setup-banner strong{color:var(--warn);display:block;font-size:11px;letter-spacing:2px;margin-bottom:8px;}
   .setup-banner code{background:rgba(255,214,10,0.12);padding:1px 6px;border-radius:2px;color:var(--warn);}
   .setup-banner a{color:var(--warn);}
@@ -773,11 +773,11 @@ async function sendEmail(name, pct, correct, total, wrong, skipped, verdict, mcq
     submitted_at:   new Date().toLocaleString(),
 
     // Score hero block
-    score_pct:     pct,
-    score_correct: correct,
-    score_wrong:   wrong,
-    score_skipped: skipped,
-    score_total:   total,
+    score_pct:     String(pct),  // String() prevents EmailJS dropping falsy 0
+    score_correct: String(correct),
+    score_wrong:   String(wrong),
+    score_skipped: String(skipped),
+    score_total:   String(total),
     verdict_text:  verdict.replace(/^[^\w\d🔥✅⚠📖]+/, '').trim(),
     verdict_color: verdictColor,
 
