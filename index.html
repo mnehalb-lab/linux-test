@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Basic DevOPs Practical Exam</title>
+<title>Advanced SysOps Practical Exam</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
@@ -51,21 +51,21 @@
   .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width 0.4s ease;}
 
   /* SECTION HEADER */
-  .section-header{display:flex;align-items:center;gap:16px;margin:50px 0 30px;}
+  .section-header{display:flex;align-items:center;gap:16px;margin:24px 0 16px;}
   .section-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);writing-mode:vertical-rl;letter-spacing:2px;}
   .section-title{font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;}
   .section-title .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:10px;vertical-align:middle;}
   .section-line{flex:1;height:1px;background:var(--border);}
 
   /* MCQ */
-  .question-card{background:var(--panel);border:1px solid var(--border);border-left:3px solid transparent;padding:28px;margin-bottom:20px;transition:border-color 0.3s,transform 0.2s;animation:fadeUp 0.5s ease both;}
+  .question-card{background:var(--panel);border:1px solid var(--border);border-left:3px solid transparent;padding:28px;margin-bottom:10px;transition:border-color 0.3s,transform 0.2s;animation:fadeUp 0.5s ease both;}
   .question-card:hover{transform:translateX(3px);}
   .question-card.answered-correct{border-left-color:var(--correct);}
   .question-card.answered-wrong{border-left-color:var(--wrong);}
   .q-number{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
   .q-topic{font-size:9px;padding:2px 8px;border-radius:1px;text-transform:uppercase;letter-spacing:1px;}
   .q-text{font-size:15px;font-weight:600;color:#e8edf5;margin-bottom:20px;line-height:1.6;}
-  .q-text code{font-family:'JetBrains Mono',monospace;background:rgba(0,229,255,0.08);color:var(--accent);padding:2px 7px;border-radius:3px;font-size:13px;}
+  .q-text code{font-family:'JetBrains Mono',monospace;background:rgba(0,229,255,0.08);color:var(--accent);padding:1px 4px;border-radius:3px;font-size:13px;display:inline;white-space:nowrap;}
   .options{display:grid;gap:8px;}
   .option{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border:1px solid var(--border);cursor:pointer;transition:all 0.2s;font-size:14px;color:var(--text);background:transparent;border-radius:2px;}
   .option:hover:not(.disabled){border-color:var(--accent);color:#fff;background:rgba(0,229,255,0.05);}
@@ -87,11 +87,11 @@
   .practical-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent2);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;}
   .practical-title{font-size:18px;font-weight:800;color:#fff;margin-bottom:16px;line-height:1.4;}
   .practical-desc{font-size:14px;color:var(--text);line-height:1.8;margin-bottom:20px;}
-  .practical-desc code{font-family:'JetBrains Mono',monospace;background:rgba(255,77,109,0.1);color:var(--accent2);padding:2px 7px;border-radius:3px;font-size:13px;}
+  .practical-desc code{font-family:'JetBrains Mono',monospace;background:rgba(255,77,109,0.1);color:var(--accent2);padding:1px 4px;border-radius:3px;font-size:13px;display:inline;white-space:nowrap;}
   .task-list{list-style:none;display:grid;gap:10px;margin-bottom:24px;}
-  .task-list li{display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--text);line-height:1.6;}
-  .task-list li::before{content:'→';color:var(--accent2);font-family:'JetBrains Mono',monospace;flex-shrink:0;margin-top:1px;}
-  .task-list li code{font-family:'JetBrains Mono',monospace;background:rgba(255,77,109,0.1);color:var(--accent2);padding:1px 6px;border-radius:2px;font-size:12px;}
+  .task-list li{font-size:14px;color:var(--text);line-height:1.7;padding-left:20px;position:relative;}
+  .task-list li::before{content:'→';color:var(--accent2);font-family:'JetBrains Mono',monospace;position:absolute;left:0;top:0;}
+  .task-list li code{font-family:'JetBrains Mono',monospace;background:rgba(255,77,109,0.1);color:var(--accent2);padding:1px 4px;border-radius:2px;font-size:12px;display:inline;white-space:nowrap;}
   .answer-area label{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
   textarea{width:100%;min-height:180px;background:#070910;border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;padding:16px;resize:vertical;outline:none;line-height:1.7;transition:border-color 0.2s;border-radius:2px;}
   textarea:focus{border-color:var(--accent2);}
@@ -150,7 +150,7 @@
 <!-- ════ HEADER ════ -->
 <div class="header">
   <div class="badge">// Advanced Practical Exam</div>
-  <h1>Basic DevOps<span>Proficiency Test</span></h1>
+  <h1>SysOps &amp; DevOps<span>Proficiency Test</span></h1>
   <p>// 20 MCQ + 3 PRACTICAL — ADVANCED LEVEL — NO TIME LIMIT</p>
   <div class="tags">
     <span class="tag tag-linux">Linux</span>
