@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced SysOps Practical Exam</title>
+<title>DevOps Practical Exam</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
@@ -49,6 +49,11 @@
   .progress-info{display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px;}
   .progress-bar{height:2px;background:var(--border);border-radius:2px;overflow:hidden;}
   .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width 0.4s ease;}
+  .timer-wrap{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-top:8px;}
+  .timer-clock{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:2px;transition:color 0.3s;}
+  .timer-clock.warn{color:var(--warn);}
+  .timer-clock.danger{color:var(--wrong);animation:timerPulse 1s ease infinite;}
+  @keyframes timerPulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
   /* SECTION HEADER */
   .section-header{display:flex;align-items:center;gap:16px;margin:24px 0 16px;}
@@ -120,16 +125,129 @@
   .submit-btn{display:block;width:100%;padding:18px;margin-top:40px;background:transparent;border:2px solid var(--accent);color:var(--accent);font-family:'Syne',sans-serif;font-size:14px;font-weight:800;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;}
   .submit-btn:hover:not(:disabled){color:var(--bg);background:var(--accent);}
   .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
-  .reset-btn{display:block;width:100%;padding:14px;margin-top:16px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
-  .reset-btn:hover{border-color:var(--muted);color:var(--text);}
+  .reset-inline-btn{margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;cursor:pointer;transition:all 0.2s;border-radius:2px;}
+  .reset-inline-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+
+  /* START OVERLAY */
+  .start-overlay{position:fixed;inset:0;background:rgba(10,12,16,0.97);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;}
+  .start-overlay.hidden{display:none;}
+  .start-box{background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--accent);padding:48px 56px;max-width:480px;width:90%;text-align:center;}
+  .start-box .s-badge{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--accent);border:1px solid var(--accent);padding:4px 14px;text-transform:uppercase;display:inline-block;margin-bottom:24px;}
+  .start-box h2{font-size:26px;font-weight:800;color:#fff;letter-spacing:-0.5px;margin-bottom:8px;}
+  .start-box p{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:32px;}
+  .start-box .info-row{display:flex;justify-content:center;gap:24px;margin-bottom:32px;}
+  .start-box .info-item{text-align:center;}
+  .start-box .info-item .iv{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--accent);}
+  .start-box .info-item .il{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+  .start-btn{width:100%;padding:16px;background:var(--accent);border:none;color:#0a0c10;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+  .start-btn:hover{opacity:0.85;}
+  .rules-box{background:#070910;border:1px solid #1e2535;border-left:3px solid var(--accent2);padding:16px 18px;margin-bottom:24px;text-align:left;}
+  .rules-box .r-title{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:10px;}
+  .rules-box ul{list-style:none;padding:0;margin:0;display:grid;gap:7px;}
+  .rules-box ul li{font-family:'JetBrains Mono',monospace;font-size:11px;color:#c8d3e8;line-height:1.5;padding-left:16px;position:relative;}
+  .rules-box ul li::before{content:'→';position:absolute;left:0;color:var(--accent2);}
+  .rules-box ul li span.ok{color:#39ff14;}
+  .rules-box ul li span.no{color:var(--accent2);}
+  .rules-ack{display:flex;align-items:center;gap:10px;margin-bottom:20px;cursor:pointer;}
+  .rules-ack input[type=checkbox]{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+  .rules-ack label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);cursor:pointer;line-height:1.5;}
+
+  /* PASSWORD MODAL */
+  .pwd-overlay{position:fixed;inset:0;background:rgba(10,12,16,0.92);z-index:10000;display:flex;align-items:center;justify-content:center;}
+  .pwd-overlay.hidden{display:none;}
+  .pwd-box{background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--accent2);padding:36px 40px;max-width:380px;width:90%;}
+  .pwd-box h3{font-size:16px;font-weight:800;color:#fff;margin-bottom:6px;}
+  .pwd-box p{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+  .pwd-box input{width:100%;background:#070910;border:1px solid var(--border);color:#fff;font-family:'JetBrains Mono',monospace;font-size:14px;padding:10px 14px;outline:none;border-radius:2px;margin-bottom:6px;transition:border-color 0.2s;}
+  .pwd-box input:focus{border-color:var(--accent2);}
+  .pwd-error{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--wrong);margin-bottom:14px;min-height:16px;}
+  .pwd-actions{display:flex;gap:10px;}
+  .pwd-confirm{flex:1;padding:10px;background:var(--accent2);border:none;color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;border-radius:2px;}
+  .pwd-confirm:hover{opacity:0.85;}
+  .pwd-cancel{padding:10px 16px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;border-radius:2px;transition:all 0.2s;}
+  .pwd-cancel:hover{border-color:var(--muted);color:var(--text);}
 
   @keyframes fadeDown{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ── PAGE TABS ── */
+  .page-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:0;position:sticky;top:0;z-index:99;background:var(--bg);padding-top:8px;}
+  .page-tab{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:10px 20px;cursor:pointer;color:var(--muted);border:1px solid transparent;border-bottom:none;transition:all 0.2s;background:transparent;margin-bottom:-1px;}
+  .page-tab:hover{color:var(--text);}
+  .page-tab.active{color:var(--accent);border-color:var(--border);border-bottom-color:var(--bg);background:var(--bg);}
+  .page-tab.ssh-tab.active{color:#39ff14;border-top-color:#39ff14;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* ── SSH PANEL ── */
+  .ssh-panel{padding:0;}
+  .ssh-info-bar{background:var(--panel);border:1px solid var(--border);border-left:3px solid #39ff14;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;flex-wrap:wrap;gap:20px;}
+  .ssh-cred{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;}
+  .ssh-cred .lbl{color:var(--muted);font-size:10px;letter-spacing:1px;text-transform:uppercase;}
+  .ssh-cred .val{color:#39ff14;font-size:13px;font-weight:700;}
+  .ssh-cred .copy-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;cursor:pointer;border-radius:2px;transition:all 0.2s;letter-spacing:1px;}
+  .ssh-cred .copy-btn:hover{border-color:#39ff14;color:#39ff14;}
+  .ssh-warning{background:rgba(255,214,10,0.06);border:1px solid rgba(255,214,10,0.25);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#c8b860;line-height:1.7;margin-bottom:16px;}
+  .ssh-warning strong{color:var(--warn);}
+  .ssh-frame-wrap{border:1px solid var(--border);border-top:3px solid #39ff14;overflow:hidden;border-radius:0 0 2px 2px;}
+  .ssh-frame-wrap iframe{width:100%;height:600px;border:none;display:block;background:#000;}
+  .ssh-launch-btn{display:block;width:100%;padding:14px;background:transparent;border:2px solid #39ff14;color:#39ff14;font-family:'Syne',sans-serif;font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;margin-bottom:16px;}
+  .ssh-launch-btn:hover{background:#39ff14;color:#0a0c10;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
   @media(max-width:600px){.score-breakdown{grid-template-columns:1fr;}.score-big{font-size:52px;}}
 </style>
 </head>
 <body>
 <div class="container">
+
+<!-- ════ START OVERLAY ════ -->
+<div class="start-overlay" id="start-overlay">
+  <div class="start-box">
+    <div class="s-badge">// DevOps Practical Exam</div>
+    <h2>Ready to Begin?</h2>
+    <p>Once you click Start, the 2-hour timer begins.<br>It will keep running even if you refresh or close the browser.</p>
+    <div class="info-row">
+      <div class="info-item"><div class="iv">20</div><div class="il">MCQ</div></div>
+      <div class="info-item"><div class="iv">3</div><div class="il">Practical</div></div>
+      <div class="info-item"><div class="iv">2h</div><div class="il">Time Limit</div></div>
+    </div>
+    <div class="rules-box">
+      <div class="r-title">// Exam Rules &amp; Conditions</div>
+      <ul>
+        <li><span class="no">✕ No AI tools allowed</span> — ChatGPT, Claude, Copilot, Gemini or any AI assistant is strictly prohibited.</li>
+        <li><span class="no">✕ MCQ section</span> — No googling allowed. Answer from your own knowledge only.</li>
+        <li><span class="ok">✓ Practical section</span> — You may Google for reference, but do NOT paste the question into any search or AI tool.</li>
+        <li><span class="no">✕ No copy-pasting</span> — Do not copy full question text into any external tool or browser search bar.</li>
+        <li><span class="ok">✓ Screen share</span> — Your screen must be shared at all times during the exam.</li>
+        <li><span class="ok">✓ Camera on</span> — Your camera must remain on for the entire duration of the exam.</li>
+        <li><span class="no">✕ Violations</span> — Any breach of these rules will result in immediate disqualification.</li>
+      </ul>
+    </div>
+    <div class="rules-ack">
+      <input type="checkbox" id="rules-check" onchange="
+        const btn = document.getElementById('start-exam-btn');
+        btn.disabled = !this.checked;
+        btn.style.opacity = this.checked ? '1' : '0.4';
+        btn.style.cursor  = this.checked ? 'pointer' : 'not-allowed';
+      ">
+      <label for="rules-check">I have read and agree to all exam rules. My screen and camera will be on throughout.</label>
+    </div>
+    <button class="start-btn" id="start-exam-btn" onclick="startExam()" disabled style="opacity:0.4;cursor:not-allowed;" onmouseenter="if(this.disabled)this.style.opacity='0.4'" >Start Exam</button>
+  </div>
+</div>
+
+<!-- ════ PASSWORD MODAL ════ -->
+<div class="pwd-overlay hidden" id="pwd-overlay">
+  <div class="pwd-box">
+    <h3>Admin Reset</h3>
+    <p>Enter the admin password to reset the exam timer and all progress.</p>
+    <input type="password" id="pwd-input" placeholder="Enter password…" onkeydown="if(event.key==='Enter')confirmReset()">
+    <div class="pwd-error" id="pwd-error"></div>
+    <div class="pwd-actions">
+      <button class="pwd-confirm" onclick="confirmReset()">Reset Exam</button>
+      <button class="pwd-cancel" onclick="closePwdModal()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <!-- ════ SETUP BANNER ════ -->
 <div class="setup-banner">
@@ -149,9 +267,9 @@
 
 <!-- ════ HEADER ════ -->
 <div class="header">
-  <div class="badge">// Advanced Practical Exam</div>
-  <h1>SysOps &amp; DevOps<span>Proficiency Test</span></h1>
-  <p>// 20 MCQ + 3 PRACTICAL — ADVANCED LEVEL — NO TIME LIMIT</p>
+  <div class="badge">// DevOps Practical Exam</div>
+  <h1>DevOps<span>Proficiency Test</span></h1>
+  <p>// 20 MCQ + 3 PRACTICAL — DEVOPS LEVEL — 2 HOUR TIME LIMIT</p>
   <div class="tags">
     <span class="tag tag-linux">Linux</span>
     <span class="tag tag-docker">Docker</span>
@@ -172,7 +290,22 @@
     <span id="score-live">Score: —</span>
   </div>
   <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="timer-wrap">
+    <span>// Time remaining:</span>
+    <span class="timer-clock" id="timer-clock">2:00:00</span>
+    <span id="timer-label"></span>
+    <button class="reset-inline-btn" onclick="resetTest()" title="Reset exam (admin only)">↺ Reset</button>
+  </div>
 </div>
+
+<!-- ════ PAGE TABS ════ -->
+<div class="page-tabs">
+  <button class="page-tab active" onclick="switchTab('exam',this)">// Exam</button>
+  <button class="page-tab ssh-tab" onclick="switchTab('ssh',this)">// SSH Terminal</button>
+</div>
+
+<!-- ════ EXAM TAB ════ -->
+<div class="tab-panel active" id="tab-exam">
 
 <!-- ══════════════════════════════════════════
      SECTION 1 · LINUX
@@ -544,8 +677,7 @@
   </div>
 </div>
 
-<button class="submit-btn" id="submit-btn" onclick="submitTest()">Submit Test &amp; Send Results to Examiner</button>
-<button class="reset-btn" onclick="resetTest()">↺ Reset Test</button>
+<button class="submit-btn" id="submit-btn" onclick="submitTest()">Submit Test</button>
 
 <!-- SCORE PANEL -->
 <div class="score-panel" id="score-panel">
@@ -572,6 +704,64 @@
     // Scroll up to see correct answers highlighted in each question card.
   </p>
 </div>
+
+</div><!-- /tab-exam -->
+
+<!-- ════ SSH TAB ════ -->
+<div class="tab-panel ssh-panel" id="tab-ssh">
+
+  <div style="margin-top:20px;">
+    <!-- Credentials bar -->
+    <div class="ssh-info-bar">
+      <div class="ssh-cred">
+        <span class="lbl">Host</span>
+        <span class="val">142.132.178.17</span>
+        <button class="copy-btn" onclick="copyVal('142.132.178.17',this)">Copy</button>
+      </div>
+      <div class="ssh-cred">
+        <span class="lbl">User</span>
+        <span class="val">root</span>
+        <button class="copy-btn" onclick="copyVal('root',this)">Copy</button>
+      </div>
+      <div class="ssh-cred">
+        <span class="lbl">Password</span>
+        <span class="val" id="pwd-display" style="letter-spacing:3px;">••••••••••••••</span>
+        <button class="copy-btn" onclick="togglePwd(this)">Show</button>
+        <button class="copy-btn" onclick="copyVal('KRAFVwnb4JmN',this)">Copy</button>
+      </div>
+      <div class="ssh-cred">
+        <span class="lbl">Port</span>
+        <span class="val">22</span>
+      </div>
+    </div>
+
+    <!-- Warning -->
+    <div class="ssh-warning">
+      <strong>// Sandbox Server — Rules</strong><br>
+      This server is provided for practical experimentation only. Do not install persistent backdoors, delete system files, or disrupt other candidates. Session activity may be logged.
+    </div>
+
+    <!-- Launch button -->
+    <button class="ssh-launch-btn" onclick="loadSSH()">⚡ Launch SSH Terminal</button>
+
+    <!-- SSH iframe (loaded on demand) -->
+    <div class="ssh-frame-wrap" id="ssh-frame-wrap" style="display:none;">
+      <iframe id="ssh-iframe" allow="clipboard-read; clipboard-write"></iframe>
+    </div>
+
+    <!-- Fallback instructions -->
+    <div style="margin-top:16px;background:var(--panel);border:1px solid var(--border);padding:20px 24px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">// Alternative — connect from your own terminal</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;background:#070910;border:1px solid var(--border);border-left:3px solid #39ff14;padding:14px 18px;color:#39ff14;">
+        ssh root@142.132.178.17
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:10px;">
+        Password: <span style="color:#39ff14;letter-spacing:1px;" id="pwd-alt">KRAFVwnb4JmN</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /tab-ssh -->
 
 </div><!-- /container -->
 
@@ -647,6 +837,7 @@ function updateCharCount(id, countId) {
 async function submitTest() {
   const candidateName = document.getElementById('candidate-name').value.trim() || 'Anonymous';
   submitted = true;
+  localStorage.setItem('exam_submitted', 'true');
   document.getElementById('submit-btn').disabled = true;
 
   // Reveal all answers
@@ -736,7 +927,7 @@ async function submitTest() {
 async function sendEmail(name, pct, correct, total, wrong, skipped, verdict, mcq, practicals, payload) {
   const statusEl = document.getElementById('email-status');
   statusEl.className   = 'email-status sending';
-  statusEl.textContent = '⏳ Sending results to mnehal66@gmail.com…';
+  statusEl.textContent = '⏳ Submitting your test, please wait…';
 
   // MCQ text block — matches {{mcq_results}} in HTML template
   const mcqText = mcq.map(q => {
@@ -807,7 +998,7 @@ async function sendEmail(name, pct, correct, total, wrong, skipped, verdict, mcq
   try {
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
     statusEl.className   = 'email-status success';
-    statusEl.textContent = `✅ Results for "${name}" sent to mnehal66@gmail.com successfully!`;
+    statusEl.textContent = `✅ Test submitted successfully! Your answers have been sent for review.`;
   } catch (err) {
     console.error('EmailJS error:', err);
     statusEl.className   = 'email-status error';
@@ -828,8 +1019,163 @@ function downloadJson(payload, name) {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
+// ════════════════════════════════════════════
+//  EXAM CONFIG
+// ════════════════════════════════════════════
+const RESET_PASSWORD = 'admin1234'; // change to your admin password
+const DURATION       = 2 * 60 * 60; // 2 hours in seconds
+const KEY_START      = 'exam_start_ts';
+const KEY_SUBMITTED  = 'exam_submitted';
+let timerInterval    = null;
+
+// ── Helpers ──
+function fmt(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function getRemaining() {
+  const start = parseInt(localStorage.getItem(KEY_START), 10);
+  if (!start) return DURATION;
+  return Math.max(0, DURATION - Math.floor((Date.now() - start) / 1000));
+}
+
+// ── Tick ──
+function tick() {
+  const remaining = getRemaining();
+  const el  = document.getElementById('timer-clock');
+  const lbl = document.getElementById('timer-label');
+  if (!el) return;
+  el.textContent = fmt(remaining);
+  el.className   = 'timer-clock';
+  if (submitted) { clearInterval(timerInterval); el.classList.add('danger'); if(lbl) lbl.textContent=''; return; }
+  if      (remaining <= 60  && remaining > 0)  { el.classList.add('danger'); if(lbl) lbl.textContent='— almost out of time!'; }
+  else if (remaining <= 300 && remaining > 60) { el.classList.add('warn');   if(lbl) lbl.textContent='— less than 5 minutes left'; }
+  else { if(lbl) lbl.textContent=''; }
+  if (remaining <= 0) {
+    clearInterval(timerInterval);
+    el.textContent = '0:00:00'; el.className = 'timer-clock danger';
+    if(lbl) lbl.textContent = '— time is up!';
+    if (!submitted) submitTest();
+  }
+}
+
+// ── Start exam (triggered by Start button) ──
+function startExam() {
+  // Record start time only once — never overwrite an existing one
+  if (!localStorage.getItem(KEY_START)) {
+    localStorage.setItem(KEY_START, Date.now().toString());
+  }
+  document.getElementById('start-overlay').classList.add('hidden');
+  tick();
+  timerInterval = setInterval(tick, 1000);
+}
+
+// ── On page load: decide whether to show start overlay or resume ──
+(function init() {
+  const alreadyStarted   = !!localStorage.getItem(KEY_START);
+  const alreadySubmitted = localStorage.getItem(KEY_SUBMITTED) === 'true';
+
+  if (alreadySubmitted) {
+    // Lock everything — already done
+    submitted = true;
+    document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('start-overlay').classList.add('hidden');
+    const el = document.getElementById('timer-clock');
+    if (el) { el.textContent = '0:00:00'; el.className = 'timer-clock danger'; }
+    const lbl = document.getElementById('timer-label');
+    if (lbl) lbl.textContent = '— already submitted';
+    return;
+  }
+
+  if (alreadyStarted) {
+    // Exam in progress — resume timer immediately, skip start screen
+    document.getElementById('start-overlay').classList.add('hidden');
+    tick();
+    timerInterval = setInterval(tick, 1000);
+  }
+  // else: start overlay stays visible until candidate clicks Start
+})();
+
+// ── Password modal ──
+// ── Tab switching ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── SSH terminal loader ──
+// Uses sshwifty public demo — connects to your server via WebSocket proxy
+// For production, host your own sshwifty instance
+function loadSSH() {
+  const wrap = document.getElementById('ssh-frame-wrap');
+  const iframe = document.getElementById('ssh-iframe');
+  const host = '142.132.178.17';
+  const user = 'root';
+  // sshwifty public instance — pre-filled connection
+  // Candidate still types the password manually (security best practice)
+  const url = `https://sshwifty-demo.niruios.com/#!wait-for-server-then-auto-connect=ssh://${user}@${host}:22`;
+  iframe.src = url;
+  wrap.style.display = 'block';
+  document.querySelector('.ssh-launch-btn').textContent = '↺ Reload Terminal';
+}
+
+// ── Copy to clipboard ──
+function copyVal(val, btn) {
+  navigator.clipboard.writeText(val).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.style.borderColor = '#39ff14';
+    btn.style.color = '#39ff14';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 1500);
+  }).catch(() => {
+    btn.textContent = 'Failed';
+    setTimeout(() => btn.textContent = 'Copy', 1200);
+  });
+}
+
+// ── Toggle password visibility ──
+function togglePwd(btn) {
+  const el = document.getElementById('pwd-display');
+  if (el.textContent.includes('•')) {
+    el.textContent = 'KRAFVwnb4JmN';
+    el.style.letterSpacing = '1px';
+    btn.textContent = 'Hide';
+  } else {
+    el.textContent = '••••••••••••••';
+    el.style.letterSpacing = '3px';
+    btn.textContent = 'Show';
+  }
+}
+
 function resetTest() {
-  if (!confirm('Reset the entire test? All answers will be lost.')) return;
+  document.getElementById('pwd-error').textContent = '';
+  document.getElementById('pwd-input').value = '';
+  document.getElementById('pwd-overlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('pwd-input').focus(), 50);
+}
+function closePwdModal() {
+  document.getElementById('pwd-overlay').classList.add('hidden');
+}
+function confirmReset() {
+  const pwd = document.getElementById('pwd-input').value;
+  if (pwd !== RESET_PASSWORD) {
+    document.getElementById('pwd-error').textContent = '✗ Incorrect password. Try again.';
+    document.getElementById('pwd-input').value = '';
+    document.getElementById('pwd-input').focus();
+    return;
+  }
+  // Correct — clear everything and reload fresh
+  localStorage.removeItem(KEY_START);
+  localStorage.removeItem(KEY_SUBMITTED);
   location.reload();
 }
 </script>
