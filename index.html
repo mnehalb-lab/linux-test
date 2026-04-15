@@ -727,7 +727,7 @@
         <span class="lbl">Password</span>
         <span class="val" id="pwd-display" style="letter-spacing:3px;">••••••••••••••</span>
         <button class="copy-btn" onclick="togglePwd(this)">Show</button>
-        <button class="copy-btn" onclick="copyVal('KRAFVwnb4JmN',this)">Copy</button>
+        <button class="copy-btn" onclick="copyVal('4here#@',this)">Copy</button>
       </div>
       <div class="ssh-cred">
         <span class="lbl">Port</span>
@@ -756,7 +756,7 @@
         ssh root@142.132.178.17
       </div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:10px;">
-        Password: <span style="color:#39ff14;letter-spacing:1px;" id="pwd-alt">KRAFVwnb4JmN</span>
+        Password: <span style="color:#39ff14;letter-spacing:1px;" id="pwd-alt">4here#@</span>
       </div>
     </div>
   </div>
@@ -1112,14 +1112,9 @@ function switchTab(name, btn) {
 // Uses sshwifty public demo — connects to your server via WebSocket proxy
 // For production, host your own sshwifty instance
 function loadSSH() {
-  const wrap = document.getElementById('ssh-frame-wrap');
+  const wrap   = document.getElementById('ssh-frame-wrap');
   const iframe = document.getElementById('ssh-iframe');
-  const host = '142.132.178.17';
-  const user = 'root';
-  // sshwifty public instance — pre-filled connection
-  // Candidate still types the password manually (security best practice)
-  const url = `https://sshwifty-demo.niruios.com/#!wait-for-server-then-auto-connect=ssh://${user}@${host}:22`;
-  iframe.src = url;
+  iframe.src = 'http://142.132.178.17:7681';
   wrap.style.display = 'block';
   document.querySelector('.ssh-launch-btn').textContent = '↺ Reload Terminal';
 }
@@ -1146,7 +1141,7 @@ function copyVal(val, btn) {
 function togglePwd(btn) {
   const el = document.getElementById('pwd-display');
   if (el.textContent.includes('•')) {
-    el.textContent = 'KRAFVwnb4JmN';
+    el.textContent = '4here#@';
     el.style.letterSpacing = '1px';
     btn.textContent = 'Hide';
   } else {
