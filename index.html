@@ -132,7 +132,7 @@
 <div class="container">
 
 <!-- ════ SETUP BANNER ════ -->
-<div class="setup-banner" style="display:none;">
+<div class="setup-banner">
   <strong>⚙️  ONE-TIME EMAILJS SETUP — COMPLETE BEFORE DEPLOYING TO GITHUB PAGES</strong>
   <ol>
     <li>Go to <a href="https://www.emailjs.com" target="_blank">emailjs.com</a> → sign up free (200 emails/month, no backend needed).</li>
@@ -579,9 +579,9 @@
 // ══════════════════════════════════════════════════════
 //  EMAILJS CONFIG — replace before deploying
 // ══════════════════════════════════════════════════════
-const EMAILJS_PUBLIC_KEY  = 'mKv0LPTWegmq-lPDT';   // Account → API Keys
-const EMAILJS_SERVICE_ID  = 'service_cfh3lty';   // Email Services tab
-const EMAILJS_TEMPLATE_ID = 'template_j5et742';  // Email Templates tab
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // Account → API Keys
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // Email Services tab
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // Email Templates tab
 // ══════════════════════════════════════════════════════
 
 emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
@@ -703,10 +703,15 @@ async function submitTest() {
     });
   });
 
+  // Read textarea values right now as plain strings
+  const p1ans = (document.getElementById('p1').value || '').trim() || '(no answer provided)';
+  const p2ans = (document.getElementById('p2').value || '').trim() || '(no answer provided)';
+  const p3ans = (document.getElementById('p3').value || '').trim() || '(no answer provided)';
+
   const practicals = {
-    practical_01: { title: 'Production Server Triage & Container Hardening', answer: document.getElementById('p1').value || '(no answer provided)' },
-    practical_02: { title: 'Network Debugging & Firewall Rule Engineering',  answer: document.getElementById('p2').value || '(no answer provided)' },
-    practical_03: { title: 'Production-Grade Multi-Container Stack',         answer: document.getElementById('p3').value || '(no answer provided)' }
+    practical_01: { title: 'Production Server Triage & Container Hardening', answer: p1ans },
+    practical_02: { title: 'Network Debugging & Firewall Rule Engineering',  answer: p2ans },
+    practical_03: { title: 'Production-Grade Multi-Container Stack',         answer: p3ans }
   };
 
   // ── Full JSON payload ──
@@ -733,25 +738,71 @@ async function sendEmail(name, pct, correct, total, wrong, skipped, verdict, mcq
   statusEl.className   = 'email-status sending';
   statusEl.textContent = '⏳ Sending results to mnehal66@gmail.com…';
 
-  // Human-readable MCQ block for email body
+  // MCQ text block — matches {{mcq_results}} in HTML template
   const mcqText = mcq.map(q => {
     const icon = q.status === 'correct' ? '✅' : q.status === 'wrong' ? '❌' : '⏭';
     return `${icon} Q${String(q.question_num).padStart(2,'0')}: ${q.question}\n` +
            `   Correct: [${q.correct_answer.toUpperCase()}]  |  Your answer: [${q.user_answer.toUpperCase()}]  |  ${q.status.toUpperCase()}`;
   }).join('\n\n');
 
-  const practicalText = Object.values(practicals).map((p, i) =>
-    `━━━ Practical ${i + 1}: ${p.title} ━━━\n${p.answer}`
-  ).join('\n\n');
+  // Verdict color — matches {{verdict_color}} in HTML template
+  const verdictColor = pct >= 75 ? '#39ff14' : pct >= 55 ? '#ffd60a' : '#ff4d6d';
 
-  const templateParams = {
-    candidate_name:    name,
-    score_summary:     `${pct}% — ${correct}/${total} correct | ${wrong} wrong | ${skipped} skipped\n${verdict}`,
-    mcq_results:       mcqText,
-    practical_answers: practicalText,
-    submitted_at:      new Date().toLocaleString(),
-    json_payload:      JSON.stringify(payload, null, 2)
+  // Extract practical answers as guaranteed plain strings
+  const p01 = String(practicals?.practical_01?.answer || '(no answer provided)');
+  const p02 = String(practicals?.practical_02?.answer || '(no answer provided)');
+  const p03 = String(practicals?.practical_03?.answer || '(no answer provided)');
+
+  // Compact JSON — strip the full practical text to avoid EmailJS 50KB limit
+  const compactPayload = {
+    candidate:    payload.candidate,
+    submitted_at: payload.submitted_at,
+    score:        payload.score,
+    mcq_results:  payload.mcq_results.map(q => ({
+      q:       q.question_num,
+      correct: q.correct_answer,
+      given:   q.user_answer,
+      status:  q.status
+    }))
   };
+
+  // All template variables — names match {{variable}} in the emailjs-template.html exactly
+  const templateParams = {
+    // Header / meta
+    candidate_name: name,
+    submitted_at:   new Date().toLocaleString(),
+
+    // Score hero block
+    score_pct:     pct,
+    score_correct: correct,
+    score_wrong:   wrong,
+    score_skipped: skipped,
+    score_total:   total,
+    verdict_text:  verdict.replace(/^[^\w\d🔥✅⚠📖]+/, '').trim(),
+    verdict_color: verdictColor,
+
+    // MCQ results block
+    mcq_results: mcqText,
+
+    // ── Practical answers as individual flat strings ──
+    // These map to {{practical_01}}, {{practical_02}}, {{practical_03}} in the template
+    practical_01: p01,
+    practical_02: p02,
+    practical_03: p03,
+
+    // Compact JSON summary (stays under EmailJS 50KB limit)
+    json_payload: JSON.stringify(compactPayload, null, 2)
+  };
+
+  // Debug: log exactly what is being sent so you can inspect in browser console
+  console.log('[EmailJS] templateParams:', JSON.stringify({
+    candidate_name: templateParams.candidate_name,
+    practical_01_length: templateParams.practical_01.length,
+    practical_01_preview: templateParams.practical_01.slice(0, 80),
+    practical_02_length: templateParams.practical_02.length,
+    practical_03_length: templateParams.practical_03.length,
+    mcq_results_length:  templateParams.mcq_results.length,
+  }, null, 2));
 
   try {
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
@@ -761,7 +812,6 @@ async function sendEmail(name, pct, correct, total, wrong, skipped, verdict, mcq
     console.error('EmailJS error:', err);
     statusEl.className   = 'email-status error';
     statusEl.innerHTML   = `❌ Email failed: ${err?.text || err?.message || 'Check console for details'}<br>Verify your Service ID, Template ID, and Public Key in the script.`;
-    // Fallback: auto-download JSON
     downloadJson(payload, name);
   }
 }
